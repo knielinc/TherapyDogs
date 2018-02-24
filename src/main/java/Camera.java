@@ -12,7 +12,7 @@ public class Camera {
      */
     public static BufferedImage takePicture(String filename) {
         try {
-            ProcessBuilder camera = new ProcessBuilder("raspistill", "-t 1", "-o " + filename);
+            ProcessBuilder camera = new ProcessBuilder("raspistill", "-t", "1", "-o", filename);
             Process cameraProcess = camera.start();
             cameraProcess.waitFor();
 
