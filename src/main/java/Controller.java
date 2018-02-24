@@ -95,19 +95,19 @@ public class Controller {
             int backVal = mySensor.measureBack();
             int leftVal = mySensor.measureLeft();
 
-            if(bottomVal != 0) {
+            if(bottomVal != -1) {
                 sensorData[0][0] = bottomVal;
             }
-            if(frontVal != 0) {
+            if(frontVal != -1) {
                 sensorData[1][0] = frontVal;
             }
-            if(rightVal != 0) {
+            if(rightVal != -1) {
                 sensorData[2][0] = rightVal;
             }
-            if(backVal != 0) {
+            if(backVal != -1) {
                 sensorData[3][0] = backVal;
             }
-            if(leftVal != 0) {
+            if(leftVal != -1) {
                 sensorData[4][0] = leftVal;
             }
 
