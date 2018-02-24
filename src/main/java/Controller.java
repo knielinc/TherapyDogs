@@ -52,11 +52,11 @@ public class Controller {
 
     private double motorHigh = 1600;
 
-    private double thrustHigh = 1600;
+    private double thrustHigh = 1900;
 
-    private double thrustRest = 1500;
+    private double thrustRest = 1700;
 
-    private double thrustLow = 1400;
+    private double thrustLow = 1500;
 
     private double groundThresh = 100;
 
@@ -159,7 +159,7 @@ public class Controller {
     private void liftOff() {
 
         if (sensorData[0][0] < 50) {
-            FlightController.setThrust(1700);
+            FlightController.setThrust((int) thrustHigh);
         } else {
             stabilizeHeight();
         }
