@@ -32,6 +32,7 @@ public class Controller {
                 sensorData[j][i] = 0;
             }
         }
+        Main.logger.info("entering liftoff");
     }
 
     private UltraSens mySensor;
@@ -93,6 +94,14 @@ public class Controller {
             sensorData[3][0] = mySensor.measureBack();
             sensorData[4][0] = mySensor.measureLeft();
 
+            /*
+            Main.logger.info("SensorDown = " + String.valueOf(sensorData[0][0]));
+            Main.logger.info("SensorFront = " + String.valueOf(sensorData[1][0]));
+            Main.logger.info("SensorRight = " + String.valueOf(sensorData[2][0]));
+            Main.logger.info("SensorBack = " + String.valueOf(sensorData[3][0]));
+            Main.logger.info("SensorLeft = " + String.valueOf(sensorData[4][0]));*/
+
+
             xVel = ((sensorData[1][1] - sensorData[1][0]) + (sensorData[3][0] - sensorData[3][1])) / 2;
             yVel = ((sensorData[2][1] - sensorData[2][0]) + (sensorData[4][0] - sensorData[4][1])) / 2;
             zVel = ((sensorData[0][1] - sensorData[0][0]));
@@ -113,6 +122,7 @@ public class Controller {
                     //TODO Calculate velocities && implement isCentered
                     if (isCentered(false) && isStable()) {
                         currStage = myStage.FLYIN1;
+                        Main.logger.info("entering flying1");
                     }
 
                     break;
@@ -121,6 +131,8 @@ public class Controller {
 
                     if (sensorData[2][0] > rightPassedRoomDistance) {
                         currStage = myStage.FLYIN2;
+                        Main.logger.info("entering flying2");
+
                     }
 
                     break;
@@ -129,27 +141,34 @@ public class Controller {
 
                     if (isStable() && isCentered(true)) {
                         currStage = myStage.ROTATE;
+                        Main.logger.info("entering rotation");
+
                     }
                     break;
                 case ROTATE:
                     if (finishedRotating) {
                         FlightController.setYaw(1600);
                         currStage = myStage.FLYOUT;
+                        Main.logger.info("entering flyout");
                     }
                     break;
                 case FLYOUT:
                     flyIn1();
                     if (isStable() && isInLandingPos()) {
                         currStage = myStage.LANDING;
+                        Main.logger.info("entering landing");
                     }
                     break;
                 case LANDING:
-                    if (sensorData[0][0] < landingThreshold)
+                    if (sensorData[0][0] < landingThreshold){
+                        inflight = false;
+                    }
                         break;
                 default:
                     break;
             }
         }
+        Main.logger.info("landing successful");
     }
 
     private boolean isStable() {
