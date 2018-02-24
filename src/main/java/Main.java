@@ -3,8 +3,8 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.image.BufferedImage;
 
-public class RapyDrone {
-    public static final Logger logger = LoggerFactory.getLogger(RapyDrone.class);
+public class Main {
+    public static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws InterruptedException {
         logger.info("TheRapyDrone - A Rapy Dogs Product");
