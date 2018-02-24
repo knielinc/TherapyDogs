@@ -38,7 +38,7 @@ public class Main {
 
         Camera.startCamera();
 
-        System.out.println("I am ready!");
+        logger.info("Drone ready for start!");
 
         BufferedImage lastImage = Camera.takePreparedPicture();
 
@@ -54,6 +54,7 @@ public class Main {
 
         Camera.stopCamera();
 
+        logger.info("Drone starts");
         while (true) {
             cont.startFlight();
         }
