@@ -96,19 +96,19 @@ public class Controller {
             int leftVal = mySensor.measureLeft();
 
             if(bottomVal != 0) {
-                sensorData[0][0] = mySensor.measureBottom();
+                sensorData[0][0] = bottomVal;
             }
             if(frontVal != 0) {
-                sensorData[1][0] = mySensor.measureFront();
+                sensorData[1][0] = frontVal;
             }
             if(rightVal != 0) {
-                sensorData[2][0] = mySensor.measureRight();
+                sensorData[2][0] = rightVal;
             }
             if(backVal != 0) {
-                sensorData[3][0] = mySensor.measureBack();
+                sensorData[3][0] = backVal;
             }
             if(leftVal != 0) {
-                sensorData[4][0] = mySensor.measureLeft();
+                sensorData[4][0] = leftVal;
             }
 
             /*
