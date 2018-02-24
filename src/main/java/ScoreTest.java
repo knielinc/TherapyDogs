@@ -1,7 +1,4 @@
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.*;
 
 public class ScoreTest {
 
@@ -9,10 +6,12 @@ public class ScoreTest {
      * @param args
      */
     public static void main(String[] args) {
-        BufferedImage lastImage = Camera.takePicture("test.jpg");
+        Camera.startCamera();
+
+        BufferedImage lastImage = Camera.takePreparedPicture();
 
         while (true) {
-            BufferedImage curImage = Camera.takePicture("test.jpg");
+            BufferedImage curImage = Camera.takePreparedPicture();
 
             System.out.println(ImageProcessing.changedColor(lastImage, curImage));
 
