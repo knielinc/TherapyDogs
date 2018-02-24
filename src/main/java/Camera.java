@@ -8,6 +8,11 @@ public class Camera {
     private static long pid = 0;
     private static Process cameraProcess;
 
+    // Kill the camera on shutdown
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(Camera::stopCamera));
+    }
+
     /**
      * Starts the camera to be able to take prepared pictures.
      */
