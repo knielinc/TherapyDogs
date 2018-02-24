@@ -95,7 +95,7 @@ public class Controller {
      * @param value the pitch
      */
     public void setPitch(int value) {
-        GpioPinPwmOutput pwm = gpio.provisionPwmOutputPin(RaspiPin.GPIO_28);
+        GpioPinPwmOutput pwm = gpio.provisionPwmOutputPin(RaspiPin.GPIO_25);
         pwm.setPwm(translate(value));
     }
 
@@ -105,7 +105,7 @@ public class Controller {
      * @param value the roll
      */
     public void setRoll(int value) {
-        GpioPinPwmOutput pwm = gpio.provisionPwmOutputPin(RaspiPin.GPIO_25);
+        GpioPinPwmOutput pwm = gpio.provisionPwmOutputPin(RaspiPin.GPIO_28);
         pwm.setPwm(translate(value));
     }
 
@@ -116,6 +116,11 @@ public class Controller {
      */
     public void setThrust(int value) {
         GpioPinPwmOutput pwm = gpio.provisionPwmOutputPin(RaspiPin.GPIO_27);
+        pwm.setPwm(translate(value));
+    }
+
+    public void setArm(int value) {
+        GpioPinPwmOutput pwm = gpio.provisionPwmOutputPin(RaspiPin.GPIO_26);
         pwm.setPwm(translate(value));
     }
 
