@@ -15,6 +15,7 @@ public class Main {
             try {
                 Thread.sleep(100);
                 sensorTriggerPin.high(); // Make trigger pin HIGH
+
                 Thread.sleep((long) 0.01);// Delay for 10 microseconds
                 sensorTriggerPin.low(); //Make trigger pin LOW
 
