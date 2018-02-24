@@ -23,7 +23,6 @@ public class Controller {
     private double zVelThreshPos = 20;
     private boolean finishedRotating = false;
 
-
     public Controller(UltraSens sensor) {
         //TODO init if needed
         mySensor = sensor;
@@ -59,8 +58,7 @@ public class Controller {
 
     private double thrustLow = 1400;
 
-    private double groundThresh = 120;
-
+    private double groundThresh = 100;
 
     private double rightPassedRoomDistance = 310;
 
