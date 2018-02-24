@@ -10,8 +10,8 @@ public class ImageProcessing {
 		// if necessary
 		int width = input.getWidth();
 		int height = input.getHeight();
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x+=4) {
+			for (int y = 0; y < height; y+=4) {
 				int clr = input.getRGB(x, y);
 				int red = (clr & 0x00ff0000) >> 16;
 				int green = (clr & 0x0000ff00) >> 8;
@@ -19,7 +19,7 @@ public class ImageProcessing {
 				score += green;
 			}
 		}
-		score /= width * height;
+		score /= width * height / 16;
 		System.out.println("score: " + score);
 		return score;
 	}
