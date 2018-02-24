@@ -35,17 +35,23 @@ public class Controller {
     }
 
     private double xVel;
-    private double xVelThreshPos;
+    private double xVelThreshPos = 20;
     private double yVel;
-    private double yVelThreshPos;
+    private double yVelThreshPos = 20;
     private double zVel;
-    private double zVelThreshPos;
+    private double zVelThreshPos = 20;
     private boolean finishedRotating = false;
 
 
     public Controller(UltraSens sensor) {
         //TODO init if needed
         mySensor = sensor;
+        for(int i = 0;i < nrOfSamples;i++){
+            timeTable[i] = 0;
+            for (int j = 0; j < 5; j++){
+                sensorData[j][i] = 0;
+            }
+        }
     }
 
     private UltraSens mySensor;
@@ -164,6 +170,11 @@ public class Controller {
             sensorData[3][0] = mySensor.measureBack();
             sensorData[4][0] = mySensor.measureLeft();
 
+            xVel = ((sensorData[1][1] - sensorData[1][0]) + (sensorData[3][0] - sensorData[3][1]))/2;
+            yVel = ((sensorData[2][1] - sensorData[2][0]) + (sensorData[4][0] - sensorData[4][1]))/2;
+            zVel = ((sensorData[0][1] - sensorData[0][0]);
+
+
             timeTable[0] = System.currentTimeMillis();
 
             switch (currStage) {
@@ -193,6 +204,7 @@ public class Controller {
                     break;
                 case ROTATE:
                     if (finishedRotating) {
+                        setYaw(1600);
                         currStage = myStage.FLYOUT;
                     }
                     break;
