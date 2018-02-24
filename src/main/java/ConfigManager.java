@@ -2,19 +2,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Properties;
 
 /**
  * Manages all your config needs
  */
 public class ConfigManager {
-    /**
-     * Stores all core fields. The core fields are the minimum needed fields to run the bot.
-     */
-    private static Map<String, String> coreFields = new LinkedHashMap<>();
-
     /**
      * The file path of the default config file.
      */
