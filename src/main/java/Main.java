@@ -1,37 +1,62 @@
-import com.pi4j.io.gpio.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.awt.image.BufferedImage;
 
 public class Main {
-    //GPIO Pins
-    private static GpioPinDigitalOutput sensorTriggerPin;
-    private static GpioPinDigitalInput sensorEchoPin;
+    public static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    final static GpioController gpio = GpioFactory.getInstance();
+    public static void main(String[] args) throws InterruptedException {
+        logger.info("TheRapyDrone - A Rapy Dogs Product");
 
-    public static void main(String[] args) {
-        sensorTriggerPin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_00); // Trigger pin as OUTPUT
-        sensorEchoPin = gpio.provisionDigitalInputPin(RaspiPin.GPIO_01, PinPullResistance.PULL_DOWN); // Echo pin as INPUT
+        UltraSens ultraSens = new UltraSens();
+        Controller cont = new Controller(ultraSens);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            FlightController.setArm(1000);
+            FlightController.setRunning(false);
+        }));
+
+        // Start flight controller
+        new Thread(new FlightController()).start();
+
+        FlightController.setArm(1000);
+        FlightController.setThrust(1000);
+        FlightController.setPitch(1500);
+        FlightController.setRoll(1500);
+        FlightController.setYaw(1500);
+
+        Thread.sleep(2000);
+
+        FlightController.setArm(2000);
+        FlightController.setThrust(1000);
+        FlightController.setPitch(1500);
+        FlightController.setRoll(1500);
+        FlightController.setYaw(1500);
+
+        Thread.sleep(2000);
+
+        Camera.startCamera();
+
+        logger.info("Drone ready for start!");
+
+        BufferedImage lastImage = Camera.takePreparedPicture();
 
         while (true) {
-            try {
-                Thread.sleep(100);
-                sensorTriggerPin.high(); // Make trigger pin HIGH
+            BufferedImage curImage = Camera.takePreparedPicture();
 
-                Thread.sleep((long) 0.01);// Delay for 10 microseconds
-                sensorTriggerPin.low(); //Make trigger pin LOW
-
-                while (sensorEchoPin.isLow()) { //Wait until the ECHO pin gets HIGH
-
-                }
-                long startTime = System.nanoTime(); // Store the surrent time to calculate ECHO pin HIGH time.
-                while (sensorEchoPin.isHigh()) { //Wait until the ECHO pin gets LOW
-
-                }
-                long endTime = System.nanoTime(); // Store the echo pin HIGH end time to calculate ECHO pin HIGH time.
-
-                System.out.println("Distance :" + ((((endTime - startTime) / 1e3) / 2) / 29.1) + " cm"); //Printing out the distance in cm
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (ImageProcessing.changedColor(lastImage, curImage)) {
+                break;
             }
+
+            lastImage = curImage;
+        }
+
+        Camera.stopCamera();
+
+        logger.info("Drone starts");
+        while (true) {
+            cont.startFlight();
         }
     }
 }

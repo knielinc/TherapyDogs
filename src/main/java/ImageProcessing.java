@@ -3,8 +3,9 @@ import java.util.ArrayList;
 
 public class ImageProcessing {
 
-	private static final int threshold = 30;
+    private static final int threshold = 30;
 
+<<<<<<< HEAD
 	public static int getScore(BufferedImage input) {
 		int score = 0;
 		// TODO save width height permanently, compare input and second scales
@@ -24,12 +25,33 @@ public class ImageProcessing {
 		System.out.println("score: " + score);
 		return score;
 	}
+=======
+    public static int getScore(BufferedImage input) {
+        int score = 0;
+        // TODO save width height permanently, compare input and second scales
+        // if necessary
+        int width = input.getWidth();
+        int height = input.getHeight();
+        for (int x = 0; x < width; x += 4) {
+            for (int y = 0; y < height; y += 4) {
+                int clr = input.getRGB(x, y);
+                int red = (clr & 0x00ff0000) >> 16;
+                int green = (clr & 0x0000ff00) >> 8;
+                score -= red;
+                score += green;
+            }
+        }
+        score /= width * height / 16;
+        System.out.println("score: " + score);
+        return score;
+    }
+>>>>>>> e88332f1146a94eebbfd7ee958d0ac8141d9449d
 
-	public static boolean changedColor(BufferedImage first, BufferedImage second) {
-		if (Math.abs(getScore(first) - getScore(second)) < threshold)
-			return false;
-		return true;
-	}
+    public static boolean changedColor(BufferedImage first, BufferedImage second) {
+        if (Math.abs(getScore(first) - getScore(second)) < threshold)
+            return false;
+        return true;
+    }
 
 	// return 1, 2 or 3 as position of the red machine, 1 wall, 2 middle, 3 room
 	public static int getPosition(ArrayList<BufferedImage> imageList) {

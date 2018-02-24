@@ -26,7 +26,7 @@ public class Camera {
             pid = f.getLong(cameraProcess);
             f.setAccessible(false);
 
-            System.out.println("Starting camera with process id: " + pid);
+            Main.logger.debug("Starting camera with process id: " + pid);
 
             // Give the camera some time to initialize
             Thread.sleep(2000);
@@ -40,7 +40,7 @@ public class Camera {
      */
     public static void stopCamera() {
         if (cameraProcess != null) {
-            System.out.println("Stopping camera.");
+            Main.logger.debug("Stopping camera.");
             cameraProcess.destroy();
         }
     }

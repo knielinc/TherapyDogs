@@ -38,26 +38,32 @@ public class FlightController implements Runnable {
     }
 
     public static void setThrust(int thrust) {
+        Main.logger.debug("Setting thrust to: " + thrust);
         FlightController.thrust = translate(thrust);
     }
 
     public static void setRoll(int roll) {
+        Main.logger.debug("Setting roll to: " + roll);
         FlightController.roll = translate(roll);
     }
 
     public static void setPitch(int pitch) {
+        Main.logger.debug("Setting pitch to: " + pitch);
         FlightController.pitch = translate(pitch);
     }
 
     public static void setYaw(int yaw) {
+        Main.logger.debug("Setting yaw to: " + yaw);
         FlightController.yaw = translate(yaw);
     }
 
     public static void setArm(int arm) {
+        Main.logger.debug("Setting arm to: " + arm);
         FlightController.arm = translate(arm);
     }
 
     public static void setRunning(boolean isRunning) {
+        Main.logger.debug("Stopping flight controller.");
         FlightController.isRunning = isRunning;
     }
 
