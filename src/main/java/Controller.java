@@ -8,9 +8,19 @@ import static com.pi4j.wiringpi.Gpio.PWM_MODE_MS;
 
 public class Controller {
     private double roomDistance = 250;
-    private double rightDistance = 120;
-    private double leftDistance = 120;
+    private double rightThreshDistance = 120;
+    private double leftThreshDistance = 120;
     private double leftDistanceLand = 40;
+
+    private double frontThreshDistance = 120;
+
+    private double backThreshDistance = 120;
+
+    private double distanceVariance = 20;
+
+    private double groundDistanceVariance = 20;
+
+    private double landingThreshold = 20;
     //TODO Implement necessary libraries/dependencies to control the flight controller
 
     private static GpioController gpio = GpioFactory.getInstance();
@@ -23,6 +33,15 @@ public class Controller {
         Gpio.pwmSetClock(CLOCK);
         Gpio.pwmSetRange(RANGE);
     }
+
+    private double xVel;
+    private double xVelThreshPos;
+    private double yVel;
+    private double yVelThreshPos;
+    private double zVel;
+    private double zVelThreshPos;
+    private boolean finishedRotating = false;
+
 
     public Controller(UltraSens sensor) {
         //TODO init if needed
@@ -40,7 +59,7 @@ public class Controller {
     private int[][] sensorData = new int[5][nrOfSamples]; // Bottom, Front, Right, Back, Left
 
     private long[] timeTable = new long[nrOfSamples];
-    
+
     private double motorLow = 1400;
 
     private double motorRest = 1500;
@@ -55,13 +74,6 @@ public class Controller {
 
     private double groundThresh = 120;
 
-    private double frontThresh = 120;
-
-    private double backThresh = 120;
-
-    private double frontBackDistanceVariance = 20;
-
-    private double groundDistanceVariance = 20;
 
     private double rightPassedRoomDistance = 310;
 
@@ -135,13 +147,13 @@ public class Controller {
     public void startFlight() {
 
 
-        while(inflight) {
+        while (inflight) {
             //propagate old values in array
-            for (int i = nrOfSamples - 1; i > 0; i++){
-                for(int j = 0; j < 5; j++){
-                    sensorData[j][i] = sensorData[j][i-1];
+            for (int i = nrOfSamples - 1; i > 0; i++) {
+                for (int j = 0; j < 5; j++) {
+                    sensorData[j][i] = sensorData[j][i - 1];
                 }
-                timeTable[i] = timeTable[i-1];
+                timeTable[i] = timeTable[i - 1];
             }
 
             //TODO maybe in parallel
@@ -152,52 +164,92 @@ public class Controller {
             sensorData[3][0] = mySensor.measureBack();
             sensorData[4][0] = mySensor.measureLeft();
 
+            timeTable[0] = System.currentTimeMillis();
+
             switch (currStage) {
                 case LIFTOFF:
                     liftOff();
+
+                    //TODO Calculate velocities && implement isCentered
+                    if (isCentered(false) && isStable()) {
+                        currStage = myStage.FLYIN1;
+                    }
+
                     break;
                 case FLYIN1:
                     flyIn1();
+
+                    if (sensorData[2][0] > rightPassedRoomDistance) {
+                        currStage = myStage.FLYIN2;
+                    }
+
                     break;
                 case FLYIN2:
-                    flyIn1();
+                    flyIn2();
+
+                    if (isStable() && isCentered(true)) {
+                        currStage = myStage.ROTATE;
+                    }
                     break;
                 case ROTATE:
+                    if (finishedRotating) {
+                        currStage = myStage.FLYOUT;
+                    }
                     break;
                 case FLYOUT:
                     flyIn1();
+                    if (isStable() && isInLandingPos()) {
+                        currStage = myStage.LANDING;
+                    }
                     break;
                 case LANDING:
-                    break;
+                    if (sensorData[0][0] < landingThreshold)
+                        break;
                 default:
                     break;
             }
         }
     }
 
+    private boolean isStable() {
+        return Math.abs(xVel) < xVelThreshPos && Math.abs(yVel) < yVelThreshPos && Math.abs(zVel) < zVelThreshPos;
+    }
+
     private void liftOff() {
 
-        stabilizeHeight();
+        if(sensorData[0][0] < 50){
+            setThrust(1700);
+        } else {
+            stabilizeHeight();
+        }
         stabilizeCenterFontBack();
         stabilizeRight();
 
     }
 
-    private void flyIn1(){
+    private void flyIn1() {
         stabilizeHeight();
         stabilizeCenterFontBack();
-        setRoll((int) ((motorRest-motorLow)/2 + motorLow));
+        setRoll((int) ((motorRest - motorLow) / 2 + motorLow));
 
     }
 
-    private void flyIn2(){
+    private void flyIn2() {
         stabilizeHeight();
         stabilizeCenterFontBack();
         stabilizeLeft();
 
     }
 
-    private void landingOrientate(){
+    private void landingOrientate() {
+        //TODO DO
+    }
+
+    private void land() {
+
+        setThrust(1450);
+        stabilizeCenterFontBack();
+        stabilizeRight();
 
     }
 
@@ -219,7 +271,7 @@ public class Controller {
         int currFront = sensorData[1][0];
 
         //TODO CAST DOUBLE TO GET GOOD MULTIPLIER
-        int frontBackThrust = (int)((((currFront - currBack) + roomDistance) / (2*roomDistance)) * (motorHigh - motorLow) + motorLow);
+        int frontBackThrust = (int) ((((currFront - currBack) + roomDistance) / (2 * roomDistance)) * (motorHigh - motorLow) + motorLow);
 
         setPitch(frontBackThrust);
 
@@ -228,43 +280,57 @@ public class Controller {
     private void stabilizeRight() {
         int currRight = sensorData[2][0];
 
-        int sideThrust = (int)((((currRight - rightDistance) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
+        int sideThrust = (int) ((((currRight - rightThreshDistance) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
 
         setRoll(sideThrust);
 
     }
 
-    private void stabilizeLeft(){
+    private void stabilizeLeft() {
         int currLeft = sensorData[4][0];
 
-        int sideThrust = (int) ((((leftDistance - currLeft) + roomDistance/2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
+        int sideThrust = (int) ((((leftThreshDistance - currLeft) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
 
         setRoll(sideThrust);
 
     }
 
-    private void stabilizeLeftLand(){
+    private void stabilizeLeftLand() {
         int currLeft = sensorData[4][0];
 
-        int sideThrust = (int) ((((leftDistanceLand - currLeft) + roomDistance/2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
+        int sideThrust = (int) ((((leftDistanceLand - currLeft) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
 
         setRoll(sideThrust);
 
     }
 
-    private void stabilizeCenterFontBackLand(){
+    private void stabilizeCenterFontBackLand() {
         int currBack = sensorData[3][0];
         int currFront = sensorData[1][0];
 
-        //TODO CAST DOUBLE TO GET GOOD MULTIPLIER
-        int frontBackThrust = (int) ((((currFront - currBack) + roomDistance) / (2*roomDistance)) * (motorHigh - motorLow) + motorLow);
+        int frontBackThrust = (int) ((((currFront - currBack) + roomDistance) / (2 * roomDistance)) * (motorHigh - motorLow) + motorLow);
 
         setPitch(frontBackThrust);
 
     }
 
-    private boolean isCentered(){
-        //TODO implement
+    private boolean isCentered(boolean isLeft) {
+        int frontDistance = sensorData[1][0];
+        int backDistance = sensorData[3][0];
+        int sideDistance;
+        if (isLeft) {
+            sideDistance = sensorData[2][0];
+        } else {
+            sideDistance = sensorData[4][0];
+        }
+
+        return Math.abs(frontDistance - frontThreshDistance) < distanceVariance &&
+                Math.abs(backDistance - backThreshDistance) < distanceVariance &&
+                Math.abs(sideDistance - rightThreshDistance) < distanceVariance;
+    }
+
+    private boolean isInLandingPos() {
+        //todo implement
         return true;
     }
 
