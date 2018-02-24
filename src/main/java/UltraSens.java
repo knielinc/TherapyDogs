@@ -61,7 +61,7 @@ public class UltraSens {
      * @param dir direction measured at
      */
     private void print(int d, String dir) {
-        Main.logger.debug("Distance " + dir + ": " + d + " cm"); //Printing out the distance in cm
+        Main.logger.trace("Distance " + dir + ": " + d + " cm"); //Printing out the distance in cm
     }
 
     /**
