@@ -175,13 +175,12 @@ public class Controller {
         stabilizeCenterFontBack();
         stabilizeRight();
 
-<<<<<<< HEAD
     }
 
     private void flyIn1(){
         stabilizeHeight();
         stabilizeCenterFontBack();
-        set_roll((motorRest-motorLow)/2 + motorLow);
+        setRoll((motorRest-motorLow)/2 + motorLow);
 
     }
 
@@ -194,8 +193,6 @@ public class Controller {
 
     private void landingOrientate(){
 
-=======
->>>>>>> origin/master
     }
 
     private void stabilizeHeight() {
@@ -236,7 +233,7 @@ public class Controller {
 
         int sideThrust = (((leftDistance - currLeft) + roomDistance/2) / (roomDistance)) * (motorHigh - motorLow) + motorLow;
 
-        set_roll(sideThrust);
+        setRoll(sideThrust);
 
     }
 
@@ -245,7 +242,7 @@ public class Controller {
 
         int sideThrust = (((leftDistanceLand - currLeft) + roomDistance/2) / (roomDistance)) * (motorHigh - motorLow) + motorLow;
 
-        set_roll(sideThrust);
+        setRoll(sideThrust);
 
     }
 
@@ -256,7 +253,7 @@ public class Controller {
         //TODO CAST DOUBLE TO GET GOOD MULTIPLIER
         int frontBackThrust = (((currFront - currBack) + roomDistance) / (2*roomDistance)) * (motorHigh - motorLow) + motorLow;
 
-        set_pitch(frontBackThrust);
+        setPitch(frontBackThrust);
 
     }
 
