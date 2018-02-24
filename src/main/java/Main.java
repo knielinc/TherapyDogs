@@ -8,55 +8,62 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
         logger.info("TheRapyDrone - A Rapy Dogs Product");
-
-        UltraSens ultraSens = new UltraSens();
-        Controller cont = new Controller(ultraSens);
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        if (args[0].equals("--motorTest")) {
             FlightController.setArm(1000);
-            FlightController.setRunning(false);
-        }));
+            FlightController.setThrust(1200);
+            FlightController.setPitch(1400);
+            FlightController.setRoll(1600);
+            FlightController.setYaw(1800);
+        } else {
+            UltraSens ultraSens = new UltraSens();
+            Controller cont = new Controller(ultraSens);
 
-        // Start flight controller
-        new Thread(new FlightController()).start();
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                FlightController.setArm(1000);
+                FlightController.setRunning(false);
+            }));
 
-        FlightController.setArm(1000);
-        FlightController.setThrust(1000);
-        FlightController.setPitch(1500);
-        FlightController.setRoll(1500);
-        FlightController.setYaw(1500);
+            // Start flight controller
+            new Thread(new FlightController()).start();
 
-        Thread.sleep(2000);
+            FlightController.setArm(1000);
+            FlightController.setThrust(1000);
+            FlightController.setPitch(1500);
+            FlightController.setRoll(1500);
+            FlightController.setYaw(1500);
 
-        FlightController.setArm(2000);
-        FlightController.setThrust(1000);
-        FlightController.setPitch(1500);
-        FlightController.setRoll(1500);
-        FlightController.setYaw(1500);
+            Thread.sleep(2000);
 
-        Thread.sleep(2000);
+            FlightController.setArm(2000);
+            FlightController.setThrust(1000);
+            FlightController.setPitch(1500);
+            FlightController.setRoll(1500);
+            FlightController.setYaw(1500);
 
-        Camera.startCamera();
+            Thread.sleep(2000);
 
-        logger.info("Drone ready for start!");
+            Camera.startCamera();
 
-        BufferedImage lastImage = Camera.takePreparedPicture();
+            logger.info("Drone ready for start!");
 
-        while (true) {
-            BufferedImage curImage = Camera.takePreparedPicture();
+            BufferedImage lastImage = Camera.takePreparedPicture();
 
-            if (ImageProcessing.changedColor(lastImage, curImage)) {
-                break;
+            while (true) {
+                BufferedImage curImage = Camera.takePreparedPicture();
+
+                if (ImageProcessing.changedColor(lastImage, curImage)) {
+                    break;
+                }
+
+                lastImage = curImage;
             }
 
-            lastImage = curImage;
-        }
+            Camera.stopCamera();
 
-        Camera.stopCamera();
-
-        logger.info("Drone starts");
-        while (true) {
-            cont.startFlight();
+            logger.info("Drone starts");
+            while (true) {
+                cont.startFlight();
+            }
         }
     }
 }
