@@ -170,12 +170,13 @@ public class Controller {
             sensorData[3][0] = mySensor.measureBack();
             sensorData[4][0] = mySensor.measureLeft();
 
-            xVel = ((sensorData[1][1] - sensorData[1][0]) + (sensorData[3][0] - sensorData[3][1]))/2;
-            yVel = ((sensorData[2][1] - sensorData[2][0]) + (sensorData[4][0] - sensorData[4][1]))/2;
-            zVel = ((sensorData[0][1] - sensorData[0][0]);
-
-
             timeTable[0] = System.currentTimeMillis();
+
+            xVel = ((double)(sensorData[1][1] - sensorData[1][0]) + (sensorData[3][0] - sensorData[3][1]))/(double)(2* (timeTable[0] - timeTable[1]) * 1000);
+            yVel = ((double)(sensorData[2][1] - sensorData[2][0]) + (sensorData[4][0] - sensorData[4][1]))/(double)(2* (timeTable[0] - timeTable[1]) * 1000);
+            zVel = ((double)(sensorData[0][1] - sensorData[0][0])/(double)((timeTable[0] - timeTable[1]) * 1000));
+
+
 
             switch (currStage) {
                 case LIFTOFF:
