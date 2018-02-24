@@ -1,10 +1,14 @@
-import com.pi4j.io.gpio.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.image.BufferedImage;
 
+public class RapyDrone {
+    public static final Logger logger = LoggerFactory.getLogger(RapyDrone.class);
 
-public class Main {
     public static void main(String[] args) throws InterruptedException {
+        logger.info("TheRapyDrone - A Rapy Dogs Product");
+
         UltraSens ultraSens = new UltraSens();
         Controller cont = new Controller(ultraSens);
 
