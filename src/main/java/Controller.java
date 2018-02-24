@@ -88,11 +88,28 @@ public class Controller {
 
             //TODO maybe in parallel
             //TODO clip/ignore false data
-            sensorData[0][0] = mySensor.measureBottom();
-            sensorData[1][0] = mySensor.measureFront();
-            sensorData[2][0] = mySensor.measureRight();
-            sensorData[3][0] = mySensor.measureBack();
-            sensorData[4][0] = mySensor.measureLeft();
+
+            int bottomVal = mySensor.measureBottom();
+            int frontVal = mySensor.measureFront();
+            int rightVal = mySensor.measureRight();
+            int backVal = mySensor.measureBack();
+            int leftVal = mySensor.measureLeft();
+
+            if(bottomVal != 0) {
+                sensorData[0][0] = mySensor.measureBottom();
+            }
+            if(frontVal != 0) {
+                sensorData[1][0] = mySensor.measureFront();
+            }
+            if(rightVal != 0) {
+                sensorData[2][0] = mySensor.measureRight();
+            }
+            if(backVal != 0) {
+                sensorData[3][0] = mySensor.measureBack();
+            }
+            if(leftVal != 0) {
+                sensorData[4][0] = mySensor.measureLeft();
+            }
 
             /*
             Main.logger.info("SensorDown = " + String.valueOf(sensorData[0][0]));
