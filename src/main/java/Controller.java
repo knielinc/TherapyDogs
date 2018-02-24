@@ -1,11 +1,3 @@
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinPwmOutput;
-import com.pi4j.io.gpio.RaspiPin;
-import com.pi4j.wiringpi.Gpio;
-
-import static com.pi4j.wiringpi.Gpio.PWM_MODE_MS;
-
 public class Controller {
     private double roomDistance = 250;
     private double rightThreshDistance = 120;
@@ -23,17 +15,6 @@ public class Controller {
     private double landingThreshold = 20;
     //TODO Implement necessary libraries/dependencies to control the flight controller
 
-    private static GpioController gpio = GpioFactory.getInstance();
-
-    private static final int CLOCK = 96;
-    private static final int RANGE = 4000;
-
-    static {
-        Gpio.pwmSetMode(PWM_MODE_MS);
-        Gpio.pwmSetClock(CLOCK);
-        Gpio.pwmSetRange(RANGE);
-    }
-
     private double xVel;
     private double xVelThreshPos = 20;
     private double yVel;
@@ -46,9 +27,9 @@ public class Controller {
     public Controller(UltraSens sensor) {
         //TODO init if needed
         mySensor = sensor;
-        for(int i = 0;i < nrOfSamples;i++){
+        for (int i = 0; i < nrOfSamples; i++) {
             timeTable[i] = 0;
-            for (int j = 0; j < 5; j++){
+            for (int j = 0; j < 5; j++) {
                 sensorData[j][i] = 0;
             }
         }
@@ -93,62 +74,6 @@ public class Controller {
         LANDING
     }
 
-    /**
-     * Translates a value between 1000 and 2000 to the appropriate pwm value.
-     *
-     * @param value the value to translate
-     * @return the translated value for the pwm signal
-     */
-    private int translate(int value) {
-        // Calculate
-        int ratio = RANGE / 20;
-        return (int) ((((double) value - 1000) / 1000) * ratio + ratio);
-    }
-
-    /**
-     * Sets the yaw of the drone.
-     *
-     * @param value the yaw
-     */
-    public void setYaw(int value) {
-        GpioPinPwmOutput pwm = gpio.provisionPwmOutputPin(RaspiPin.GPIO_29);
-        pwm.setPwm(translate(value));
-    }
-
-    /**
-     * Sets the pitch of the drone.
-     *
-     * @param value the pitch
-     */
-    public void setPitch(int value) {
-        GpioPinPwmOutput pwm = gpio.provisionPwmOutputPin(RaspiPin.GPIO_25);
-        pwm.setPwm(translate(value));
-    }
-
-    /**
-     * Sets the roll of the drone.
-     *
-     * @param value the roll
-     */
-    public void setRoll(int value) {
-        GpioPinPwmOutput pwm = gpio.provisionPwmOutputPin(RaspiPin.GPIO_28);
-        pwm.setPwm(translate(value));
-    }
-
-    /**
-     * Sets the thrust of the drone.
-     *
-     * @param value the thrust
-     */
-    public void setThrust(int value) {
-        GpioPinPwmOutput pwm = gpio.provisionPwmOutputPin(RaspiPin.GPIO_27);
-        pwm.setPwm(translate(value));
-    }
-
-    public void setArm(int value) {
-        GpioPinPwmOutput pwm = gpio.provisionPwmOutputPin(RaspiPin.GPIO_26);
-        pwm.setPwm(translate(value));
-    }
 
     public void startFlight() {
 
@@ -170,9 +95,9 @@ public class Controller {
             sensorData[3][0] = mySensor.measureBack();
             sensorData[4][0] = mySensor.measureLeft();
 
-            xVel = ((sensorData[1][1] - sensorData[1][0]) + (sensorData[3][0] - sensorData[3][1]))/2;
-            yVel = ((sensorData[2][1] - sensorData[2][0]) + (sensorData[4][0] - sensorData[4][1]))/2;
-            zVel = ((sensorData[0][1] - sensorData[0][0]);
+            xVel = ((sensorData[1][1] - sensorData[1][0]) + (sensorData[3][0] - sensorData[3][1])) / 2;
+            yVel = ((sensorData[2][1] - sensorData[2][0]) + (sensorData[4][0] - sensorData[4][1])) / 2;
+            zVel = ((sensorData[0][1] - sensorData[0][0]));
 
 
             timeTable[0] = System.currentTimeMillis();
@@ -204,7 +129,7 @@ public class Controller {
                     break;
                 case ROTATE:
                     if (finishedRotating) {
-                        setYaw(1600);
+                        FlightController.setYaw(1600);
                         currStage = myStage.FLYOUT;
                     }
                     break;
@@ -229,8 +154,8 @@ public class Controller {
 
     private void liftOff() {
 
-        if(sensorData[0][0] < 50){
-            setThrust(1700);
+        if (sensorData[0][0] < 50) {
+            FlightController.setThrust(1700);
         } else {
             stabilizeHeight();
         }
@@ -242,7 +167,7 @@ public class Controller {
     private void flyIn1() {
         stabilizeHeight();
         stabilizeCenterFontBack();
-        setRoll((int) ((motorRest - motorLow) / 2 + motorLow));
+        FlightController.setRoll((int) ((motorRest - motorLow) / 2 + motorLow));
 
     }
 
@@ -259,7 +184,7 @@ public class Controller {
 
     private void land() {
 
-        setThrust(1450);
+        FlightController.setThrust(1450);
         stabilizeCenterFontBack();
         stabilizeRight();
 
@@ -270,11 +195,11 @@ public class Controller {
         int currHeight = sensorData[0][0];
 
         if (currHeight < groundThresh) {
-            setThrust((int) thrustHigh);
+            FlightController.setThrust((int) thrustHigh);
         } else if (currHeight > groundThresh + groundDistanceVariance) {
-            setThrust((int) thrustLow);
+            FlightController.setThrust((int) thrustLow);
         } else {
-            setThrust((int) thrustRest);
+            FlightController.setThrust((int) thrustRest);
         }
     }
 
@@ -285,7 +210,7 @@ public class Controller {
         //TODO CAST DOUBLE TO GET GOOD MULTIPLIER
         int frontBackThrust = (int) ((((currFront - currBack) + roomDistance) / (2 * roomDistance)) * (motorHigh - motorLow) + motorLow);
 
-        setPitch(frontBackThrust);
+        FlightController.setPitch(frontBackThrust);
 
     }
 
@@ -294,7 +219,7 @@ public class Controller {
 
         int sideThrust = (int) ((((currRight - rightThreshDistance) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
 
-        setRoll(sideThrust);
+        FlightController.setRoll(sideThrust);
 
     }
 
@@ -303,7 +228,7 @@ public class Controller {
 
         int sideThrust = (int) ((((leftThreshDistance - currLeft) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
 
-        setRoll(sideThrust);
+        FlightController.setRoll(sideThrust);
 
     }
 
@@ -312,7 +237,7 @@ public class Controller {
 
         int sideThrust = (int) ((((leftDistanceLand - currLeft) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
 
-        setRoll(sideThrust);
+        FlightController.setRoll(sideThrust);
 
     }
 
@@ -322,7 +247,7 @@ public class Controller {
 
         int frontBackThrust = (int) ((((currFront - currBack) + roomDistance) / (2 * roomDistance)) * (motorHigh - motorLow) + motorLow);
 
-        setPitch(frontBackThrust);
+        FlightController.setPitch(frontBackThrust);
 
     }
 

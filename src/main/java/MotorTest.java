@@ -1,8 +1,29 @@
 public class MotorTest {
     public static void main(String[] args) {
-        UltraSens sens = new UltraSens();
-        Controller controller = new Controller(sens);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            FlightController.setArm(1000);
+            FlightController.setRunning(false);
+        }));
 
-        controller.setArm(1000);
+        // Start flight controller
+        new Thread(new FlightController()).start();
+
+        FlightController.setArm(1000);
+        FlightController.setThrust(1000);
+        FlightController.setPitch(1500);
+        FlightController.setRoll(1500);
+        FlightController.setYaw(1500);
+
+        FlightController.setArm(2000);
+        FlightController.setThrust(1000);
+        FlightController.setPitch(1500);
+        FlightController.setRoll(1500);
+        FlightController.setYaw(1500);
+
+        FlightController.setArm(2000);
+        FlightController.setThrust(2000);
+        FlightController.setPitch(1500);
+        FlightController.setRoll(1500);
+        FlightController.setYaw(1500);
     }
 }
