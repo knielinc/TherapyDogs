@@ -7,10 +7,10 @@ import com.pi4j.wiringpi.Gpio;
 import static com.pi4j.wiringpi.Gpio.PWM_MODE_MS;
 
 public class Controller {
-    private int roomDistance = 250;
-    private int rightDistance = 120;
-    private int leftDistance = 120;
-    private int leftDistanceLand = 40;
+    private double roomDistance = 250;
+    private double rightDistance = 120;
+    private double leftDistance = 120;
+    private double leftDistanceLand = 40;
     //TODO Implement necessary libraries/dependencies to control the flight controller
 
     private static GpioController gpio = GpioFactory.getInstance();
@@ -41,29 +41,29 @@ public class Controller {
 
     private long[] timeTable = new long[nrOfSamples];
     
-    private int motorLow = 1400;
+    private double motorLow = 1400;
 
-    private int motorRest = 1500;
+    private double motorRest = 1500;
 
-    private int motorHigh = 1600;
+    private double motorHigh = 1600;
 
-    private int thrustHigh = 1600;
+    private double thrustHigh = 1600;
 
-    private int thrustRest = 1500;
+    private double thrustRest = 1500;
 
-    private int thrustLow = 1400;
+    private double thrustLow = 1400;
 
-    private int groundThresh = 120;
+    private double groundThresh = 120;
 
-    private int frontThresh = 120;
+    private double frontThresh = 120;
 
-    private int backThresh = 120;
+    private double backThresh = 120;
 
-    private int frontBackDistanceVariance = 20;
+    private double frontBackDistanceVariance = 20;
 
-    private int groundDistanceVariance = 20;
+    private double groundDistanceVariance = 20;
 
-    private int rightPassedRoomDistance = 310;
+    private double rightPassedRoomDistance = 310;
 
 
     public enum myStage {
@@ -140,6 +140,7 @@ public class Controller {
             }
 
             //TODO maybe in parallel
+            //TODO clip/ignore false data
             sensorData[0][0] = mySensor.measureBottom();
             sensorData[1][0] = mySensor.measureFront();
             sensorData[2][0] = mySensor.measureRight();
@@ -180,7 +181,7 @@ public class Controller {
     private void flyIn1(){
         stabilizeHeight();
         stabilizeCenterFontBack();
-        setRoll((motorRest-motorLow)/2 + motorLow);
+        setRoll((int) ((motorRest-motorLow)/2 + motorLow));
 
     }
 
@@ -200,11 +201,11 @@ public class Controller {
         int currHeight = sensorData[0][0];
 
         if (currHeight < groundThresh) {
-            setThrust(thrustHigh);
+            setThrust((int) thrustHigh);
         } else if (currHeight > groundThresh + groundDistanceVariance) {
-            setThrust(thrustLow);
+            setThrust((int) thrustLow);
         } else {
-            setThrust(thrustRest);
+            setThrust((int) thrustRest);
         }
     }
 
@@ -213,7 +214,7 @@ public class Controller {
         int currFront = sensorData[1][0];
 
         //TODO CAST DOUBLE TO GET GOOD MULTIPLIER
-        int frontBackThrust = (((currFront - currBack) + roomDistance) / (2*roomDistance)) * (motorHigh - motorLow) + motorLow;
+        int frontBackThrust = (int)((((currFront - currBack) + roomDistance) / (2*roomDistance)) * (motorHigh - motorLow) + motorLow);
 
         setPitch(frontBackThrust);
 
@@ -222,7 +223,7 @@ public class Controller {
     private void stabilizeRight() {
         int currRight = sensorData[2][0];
 
-        int sideThrust = (((currRight - rightDistance) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow;
+        int sideThrust = (int)((((currRight - rightDistance) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
 
         setRoll(sideThrust);
 
@@ -231,7 +232,7 @@ public class Controller {
     private void stabilizeLeft(){
         int currLeft = sensorData[4][0];
 
-        int sideThrust = (((leftDistance - currLeft) + roomDistance/2) / (roomDistance)) * (motorHigh - motorLow) + motorLow;
+        int sideThrust = (int) ((((leftDistance - currLeft) + roomDistance/2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
 
         setRoll(sideThrust);
 
@@ -240,7 +241,7 @@ public class Controller {
     private void stabilizeLeftLand(){
         int currLeft = sensorData[4][0];
 
-        int sideThrust = (((leftDistanceLand - currLeft) + roomDistance/2) / (roomDistance)) * (motorHigh - motorLow) + motorLow;
+        int sideThrust = (int) ((((leftDistanceLand - currLeft) + roomDistance/2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
 
         setRoll(sideThrust);
 
@@ -251,7 +252,7 @@ public class Controller {
         int currFront = sensorData[1][0];
 
         //TODO CAST DOUBLE TO GET GOOD MULTIPLIER
-        int frontBackThrust = (((currFront - currBack) + roomDistance) / (2*roomDistance)) * (motorHigh - motorLow) + motorLow;
+        int frontBackThrust = (int) ((((currFront - currBack) + roomDistance) / (2*roomDistance)) * (motorHigh - motorLow) + motorLow);
 
         setPitch(frontBackThrust);
 
