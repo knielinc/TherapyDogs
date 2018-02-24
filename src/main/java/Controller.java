@@ -1,6 +1,8 @@
 public class Controller {
     private int roomDistance = 250;
     private int rightDistance = 120;
+    private int leftDistance = 120;
+    private int leftDistanceLand = 40;
     //TODO Implement necessary libraries/dependencies to control the flight controller
     
     public Controller(UltraSens sensor){
@@ -14,7 +16,11 @@ public class Controller {
 
     private boolean inflight = true;
 
-    private int[][] sensorData = new int[5][2]; // Bottom, Front, Right, Back, Left
+    private final int nrOfSamples = 20;
+
+    private int[][] sensorData = new int[5][nrOfSamples]; // Bottom, Front, Right, Back, Left
+
+    private long[] timeTable = new long[nrOfSamples];
     
     private int motorLow = 1400;
     
@@ -38,13 +44,15 @@ public class Controller {
 
     private int groundDistanceVariance = 20;
 
+    private int rightPassedRoomDistance = 310;
+
 
 
 
     public enum myStage {
         LIFTOFF,
-        CENTER,
-        FLYIN,
+        FLYIN1,
+        FLYIN2,
         ROTATE,
         FLYOUT,
         LANDING
@@ -71,17 +79,35 @@ public class Controller {
         
 
         while(inflight) {
-            //set thrust to start to something sensible
+            //propagate old values in array
+            for (int i = nrOfSamples - 1; i > 0; i++){
+                for(int j = 0; j < 5; j++){
+                    sensorData[j][i] = sensorData[j][i-1];
+                }
+                timeTable[i] = timeTable[i-1];
+            }
+
+            //TODO maybe in parallel
+            sensorData[0][0] = mySensor.measureBottom();
+            sensorData[1][0] = mySensor.measureFront();
+            sensorData[2][0] = mySensor.measureRight();
+            sensorData[3][0] = mySensor.measureBack();
+            sensorData[4][0] = mySensor.measureLeft();
+
             switch (currStage) {
                 case LIFTOFF:
+                    liftOff();
                     break;
-                case CENTER:
+                case FLYIN1:
+                    flyIn1();
                     break;
-                case FLYIN:
+                case FLYIN2:
+                    flyIn1();
                     break;
                 case ROTATE:
                     break;
                 case FLYOUT:
+                    flyIn1();
                     break;
                 case LANDING:
                     break;
@@ -96,7 +122,25 @@ public class Controller {
         stabilizeHeight();
         stabilizeCenterFontBack();
         stabilizeRight();
-        
+
+    }
+
+    private void flyIn1(){
+        stabilizeHeight();
+        stabilizeCenterFontBack();
+        set_roll((motorRest-motorLow)/2 + motorLow);
+
+    }
+
+    private void flyIn2(){
+        stabilizeHeight();
+        stabilizeCenterFontBack();
+        stabilizeLeft();
+
+    }
+
+    private void landingOrientate(){
+
     }
 
     private void stabilizeHeight(){
@@ -116,6 +160,7 @@ public class Controller {
         int currBack = sensorData[3][0];
         int currFront = sensorData[1][0];
 
+        //TODO CAST DOUBLE TO GET GOOD MULTIPLIER
         int frontBackThrust = (((currFront - currBack) + roomDistance) / (2*roomDistance)) * (motorHigh - motorLow) + motorLow;
 
         set_pitch(frontBackThrust);
@@ -130,7 +175,36 @@ public class Controller {
         set_roll(sideThrust);
 
     }
-    
+
+    private void stabilizeLeft(){
+        int currLeft = sensorData[4][0];
+
+        int sideThrust = (((leftDistance - currLeft) + roomDistance/2) / (roomDistance)) * (motorHigh - motorLow) + motorLow;
+
+        set_roll(sideThrust);
+
+    }
+
+    private void stabilizeLeftLand(){
+        int currLeft = sensorData[4][0];
+
+        int sideThrust = (((leftDistanceLand - currLeft) + roomDistance/2) / (roomDistance)) * (motorHigh - motorLow) + motorLow;
+
+        set_roll(sideThrust);
+
+    }
+
+    private void stabilizeCenterFontBackLand(){
+        int currBack = sensorData[3][0];
+        int currFront = sensorData[1][0];
+
+        //TODO CAST DOUBLE TO GET GOOD MULTIPLIER
+        int frontBackThrust = (((currFront - currBack) + roomDistance) / (2*roomDistance)) * (motorHigh - motorLow) + motorLow;
+
+        set_pitch(frontBackThrust);
+
+    }
+
     private boolean isCentered(){
         //TODO implement
         return true;
