@@ -91,7 +91,7 @@
         </encoder>
     </appender>
 
-    <root level="DEBUG">
+    <root level="TRACE">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="STDERR"/>
 
