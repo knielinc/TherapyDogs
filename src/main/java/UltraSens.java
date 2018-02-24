@@ -37,10 +37,14 @@ public class UltraSens {
             Thread.sleep((long) 0.01);// Delay for 10 microseconds
             sensorTriggerPins[sensNr].low(); //Make trigger pin LOW
 
+            long startTime = System.currentTimeMillis();
             while (sensorEchoPins[sensNr].isLow()) { //Wait until the ECHO pin gets HIGH
-
+                if (System.currentTimeMillis() < startTime + 1000) {
+                    Main.logger.warn("Sensor " + sensNr + " is not responding!");
+                    return 0;
+                }
             }
-            long startTime = System.nanoTime(); // Store the current time to calculate ECHO pin HIGH time.
+            startTime = System.nanoTime(); // Store the current time to calculate ECHO pin HIGH time.
             while (sensorEchoPins[sensNr].isHigh()) { //Wait until the ECHO pin gets LOW
 
             }
@@ -50,7 +54,7 @@ public class UltraSens {
             return (int) ((((endTime - startTime) / 1e3) / 2) / 29.1);
         } catch (InterruptedException e) {
             e.printStackTrace();
-            return -1000;
+            return 0;
         }
     }
 

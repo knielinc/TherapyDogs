@@ -64,9 +64,10 @@ public class Main {
             Camera.stopCamera();
 
             logger.info("Drone starts");
-            while (true) {
-                cont.startFlight();
-            }
+
+            //FlightController.setThrust(1700);
+
+            cont.startFlight();
         }
     }
 }
