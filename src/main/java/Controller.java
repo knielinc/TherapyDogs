@@ -80,7 +80,7 @@ public class Controller {
 
         while (inflight) {
             //propagate old values in array
-            for (int i = nrOfSamples - 1; i > 0; i++) {
+            for (int i = nrOfSamples - 1; i > 0; i--) {
                 for (int j = 0; j < 5; j++) {
                     sensorData[j][i] = sensorData[j][i - 1];
                 }

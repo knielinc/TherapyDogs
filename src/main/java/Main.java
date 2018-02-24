@@ -8,23 +8,26 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
         logger.info("TheRapyDrone - A Rapy Dogs Product");
-        if (args[0].equals("--motorTest")) {
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            FlightController.setArm(1000);
+            FlightController.setRunning(false);
+        }));
+
+        // Start flight controller
+        new Thread(new FlightController()).start();
+
+        if (args.length > 0 && args[0].equals("--motorTest")) {
             FlightController.setArm(1000);
             FlightController.setThrust(1200);
             FlightController.setPitch(1400);
             FlightController.setRoll(1600);
             FlightController.setYaw(1800);
+
+            while (true) { Thread.sleep(1000); }
         } else {
             UltraSens ultraSens = new UltraSens();
             Controller cont = new Controller(ultraSens);
-
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                FlightController.setArm(1000);
-                FlightController.setRunning(false);
-            }));
-
-            // Start flight controller
-            new Thread(new FlightController()).start();
 
             FlightController.setArm(1000);
             FlightController.setThrust(1000);
