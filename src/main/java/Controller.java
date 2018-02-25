@@ -1,3 +1,11 @@
+import org.apache.commons.io.FileUtils;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+
 public class Controller {
     private double roomDistance = 250;
     private double rightThreshDistance = 120;
@@ -57,9 +65,9 @@ public class Controller {
 
     private double thrustRest = 1700;
 
-    private double thrustLow = 1500;
+    private double thrustLow = 1400;
 
-    private double groundThresh = 50;
+    private double groundThresh = 40;
 
     private double rightPassedRoomDistance = 310;
 
@@ -101,19 +109,19 @@ public class Controller {
             int backVal = mySensor.measureBack();
             int leftVal = mySensor.measureLeft();
 
-            if(bottomVal != -1) {
+            if (bottomVal != -1) {
                 sensorData[0][0] = bottomVal;
             }
-            if(frontVal != -1) {
+            if (frontVal != -1) {
                 sensorData[1][0] = frontVal;
             }
-            if(rightVal != -1) {
+            if (rightVal != -1) {
                 sensorData[2][0] = rightVal;
             }
-            if(backVal != -1) {
+            if (backVal != -1) {
                 sensorData[3][0] = backVal;
             }
-            if(leftVal != -1) {
+            if (leftVal != -1) {
                 sensorData[4][0] = leftVal;
             }
 
@@ -131,9 +139,9 @@ public class Controller {
 
             timeTable[0] = System.currentTimeMillis();
 
-            xVel = ((double)(sensorData[1][1] - sensorData[1][0]) + (sensorData[3][0] - sensorData[3][1]))/(double)(2* (timeTable[0] - timeTable[1]) * 1000);
-            yVel = ((double)(sensorData[2][1] - sensorData[2][0]) + (sensorData[4][0] - sensorData[4][1]))/(double)(2* (timeTable[0] - timeTable[1]) * 1000);
-            zVel = ((double)(sensorData[0][1] - sensorData[0][0])/(double)((timeTable[0] - timeTable[1]) * 1000));
+            xVel = ((double) (sensorData[1][1] - sensorData[1][0]) + (sensorData[3][0] - sensorData[3][1])) / (double) (2 * (timeTable[0] - timeTable[1]) * 1000);
+            yVel = ((double) (sensorData[2][1] - sensorData[2][0]) + (sensorData[4][0] - sensorData[4][1])) / (double) (2 * (timeTable[0] - timeTable[1]) * 1000);
+            zVel = ((double) (sensorData[0][1] - sensorData[0][0]) / (double) ((timeTable[0] - timeTable[1]) * 1000));
 
             switch (currStage) {
                 case LIFTOFF:
@@ -142,7 +150,9 @@ public class Controller {
                     //TODO Calculate velocities && implement isCentered
                     if (isCentered(false) && isStable()) {
                         currStage = myStage.FLYIN1;
-                        Main.logger.info("entering flying1");
+                        Main.logger.info("----------------");
+                        Main.logger.info("Entering flying1");
+                        Main.logger.info("----------------");
                     }
 
                     break;
@@ -151,8 +161,9 @@ public class Controller {
 
                     if (sensorData[2][0] > rightPassedRoomDistance) {
                         currStage = myStage.FLYIN2;
-                        Main.logger.info("entering flying2");
-
+                        Main.logger.info("----------------");
+                        Main.logger.info("Entering flying2");
+                        Main.logger.info("----------------");
                     }
 
                     break;
@@ -161,34 +172,66 @@ public class Controller {
 
                     if (isStable() && isCentered(true)) {
                         currStage = myStage.ROTATE;
-                        Main.logger.info("entering rotation");
+                        Main.logger.info("-----------------");
+                        Main.logger.info("Entering rotation");
+                        Main.logger.info("-----------------");
 
+                        // Take timelapse
+                        try {
+                            FileUtils.cleanDirectory(new File("images"));
+                            ProcessBuilder processBuilder = new ProcessBuilder("raspistill", "-t", "10000", "-tl", "1000", "-w", "1640", "-h", "922", "-q", "10", "-o", "images/image%02d.jpg");
+                            Process timelapse = processBuilder.start();
+                            timelapse.waitFor();
+                        } catch (IOException | InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                     break;
                 case ROTATE:
+                    ArrayList<BufferedImage> images = new ArrayList<>();
+                    try {
+                        File dir = new File("images");
+                        File[] directoryListing = dir.listFiles();
+                        if (directoryListing != null) {
+                            for (File child : directoryListing) {
+                                images.add(ImageIO.read(child));
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    // Process images
+                    Main.logger.info("It seems that engine " + ImageProcessing.getPosition(images) + "is broken.");
+
+                    finishedRotating = true;
                     if (finishedRotating) {
                         FlightController.setYaw(1600);
                         currStage = myStage.FLYOUT;
-                        Main.logger.info("entering flyout");
+                        Main.logger.info("---------------");
+                        Main.logger.info("Entering flyout");
+                        Main.logger.info("---------------");
                     }
                     break;
                 case FLYOUT:
                     flyIn1();
                     if (isStable() && isInLandingPos()) {
                         currStage = myStage.LANDING;
-                        Main.logger.info("entering landing");
+                        Main.logger.info("----------------");
+                        Main.logger.info("Entering landing");
+                        Main.logger.info("----------------");
                     }
                     break;
                 case LANDING:
-                    if (sensorData[0][0] < landingThreshold){
+                    if (sensorData[0][0] < landingThreshold) {
                         inflight = false;
                     }
-                        break;
+                    break;
                 default:
                     break;
             }
         }
-        Main.logger.info("landing successful");
+        Main.logger.info("Landing successful!");
     }
 
     private boolean isStable() {
@@ -234,7 +277,6 @@ public class Controller {
     }
 
     private void stabilizeHeight() {
-
         int currHeight = sensorData[0][0];
 
         if (currHeight < groundThresh) {
@@ -260,7 +302,7 @@ public class Controller {
     private void stabilizeRight() {
         int currRight = sensorData[2][0];
 
-        int sideThrust = (int) Math.min(thrustHigh,((((currRight - rightThreshDistance) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow));
+        int sideThrust = (int) Math.min(thrustHigh, ((((currRight - rightThreshDistance) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow));
 
         FlightController.setRoll(sideThrust);
 
@@ -269,7 +311,7 @@ public class Controller {
     private void stabilizeLeft() {
         int currLeft = sensorData[4][0];
 
-        int sideThrust = (int) Math.max(thrustLow,((1-(((currLeft - leftThreshDistance) + roomDistance / 2) / (roomDistance))) * (motorHigh - motorLow) + motorLow));
+        int sideThrust = (int) Math.max(thrustLow, ((1 - (((currLeft - leftThreshDistance) + roomDistance / 2) / (roomDistance))) * (motorHigh - motorLow) + motorLow));
 
         FlightController.setRoll(sideThrust);
 

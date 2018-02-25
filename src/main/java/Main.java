@@ -1,11 +1,13 @@
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.image.BufferedImage;
+
 public class Main {
     public static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws InterruptedException {
-        logger.info("TheRapyDrone - A Rapy Dogs Product");
+        logger.info("TherapyDrone");
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             FlightController.setArm(1000);
@@ -43,9 +45,9 @@ public class Main {
 
             Thread.sleep(2000);
 
-            //logger.info("Drone ready for start!");
+            logger.info("Drone ready for start!");
 
-            /*Camera.startCamera();
+            Camera.startCamera();
 
             BufferedImage lastImage = Camera.takePreparedPicture();
 
@@ -59,7 +61,7 @@ public class Main {
                 lastImage = curImage;
             }
 
-            Camera.stopCamera();*/
+            Camera.stopCamera();
 
             logger.info("Drone starts");
 
