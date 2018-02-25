@@ -18,7 +18,7 @@ public class Controller {
 
     private double distanceVariance = 20;
 
-    private double groundDistanceVariance = 20;
+    private double groundDistanceVariance = 10;
 
     private double landingThreshold = 20;
     //TODO Implement necessary libraries/dependencies to control the flight controller
@@ -144,7 +144,7 @@ public class Controller {
             zVel = ((double) (sensorData[0][1] - sensorData[0][0]) / (double) ((timeTable[0] - timeTable[1]) * 1000));
 
             Process timelapse = null;
-
+            long captureTime = 0;
             switch (currStage) {
                 case LIFTOFF:
                     liftOff();
@@ -183,15 +183,14 @@ public class Controller {
                             FileUtils.cleanDirectory(new File("images"));
                             ProcessBuilder processBuilder = new ProcessBuilder("raspistill", "-t", "0", "-tl", "1000", "-w", "1640", "-h", "922", "-q", "10", "-o", "images/image%02d.jpg");
                             timelapse = processBuilder.start();
-
-                            timelapse.waitFor();
-                        } catch (IOException | InterruptedException e) {
+                            captureTime = System.currentTimeMillis();
+                        } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
                     break;
                 case ROTATE:
-                    if (sensorData[2][0] > rightPassedRoomDistance) {
+                    if ((sensorData[2][0] > rightPassedRoomDistance && System.currentTimeMillis() > captureTime + 5000) || System.currentTimeMillis() > captureTime + 12000) {
                         if (timelapse != null) {
                             timelapse.destroy();
                         }
@@ -220,7 +219,15 @@ public class Controller {
                     }
 
                     // Process images
-                    Main.logger.info("It seems that engine " + ImageProcessing.getPosition(images) + "is broken.");
+                    int[] ints = ImageProcessing.getPosition(images);
+                    Main.logger.info("It seems that engine " + ints[0] + "is broken.");
+                    BufferedImage bufferedImage = images.get(ints[1]);
+                    File outputfile = new File("broken.jpg");
+                    try {
+                        ImageIO.write(bufferedImage, "jpg", outputfile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
                     if (isStable() && isInLandingPos()) {
                         currStage = myStage.LANDING;
@@ -252,12 +259,7 @@ public class Controller {
     }
 
     private void liftOff() {
-
-        if (sensorData[0][0] < 50) {
-            FlightController.setThrust((int) thrustHigh);
-        } else {
-            stabilizeHeight();
-        }
+        stabilizeHeight();
         stabilizeCenterFontBack();
         stabilizeRight();
 
