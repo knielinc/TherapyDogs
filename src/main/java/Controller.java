@@ -83,7 +83,8 @@ public class Controller {
 
 
     public void startFlight() {
-
+        Process timelapse = null;
+        long captureTime = 0;
 
         while (inflight) {
             //propagate old values in array
@@ -143,8 +144,6 @@ public class Controller {
             yVel = ((double) (sensorData[2][1] - sensorData[2][0]) + (sensorData[4][0] - sensorData[4][1])) / (double) (2 * (timeTable[0] - timeTable[1]) * 1000);
             zVel = ((double) (sensorData[0][1] - sensorData[0][0]) / (double) ((timeTable[0] - timeTable[1]) * 1000));
 
-            Process timelapse = null;
-            long captureTime = 0;
             switch (currStage) {
                 case LIFTOFF:
                     liftOff();
@@ -190,7 +189,7 @@ public class Controller {
                     }
                     break;
                 case ROTATE:
-                    if ((sensorData[2][0] > rightPassedRoomDistance && System.currentTimeMillis() > captureTime + 5000) || System.currentTimeMillis() > captureTime + 12000) {
+                    if ((sensorData[2][0] > rightPassedRoomDistance && System.currentTimeMillis() > captureTime + 7000) || System.currentTimeMillis() > captureTime + 15000) {
                         if (timelapse != null) {
                             timelapse.destroy();
                         }
@@ -220,7 +219,7 @@ public class Controller {
 
                     // Process images
                     int[] ints = ImageProcessing.getPosition(images);
-                    Main.logger.info("It seems that engine " + ints[0] + "is broken.");
+                    Main.logger.info("It seems that engine " + ints[0] + " is broken.");
                     BufferedImage bufferedImage = images.get(ints[1]);
                     File outputfile = new File("broken.jpg");
                     try {
