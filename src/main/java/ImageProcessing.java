@@ -31,7 +31,7 @@ public class ImageProcessing {
     }
 
     // return 1, 2 or 3 as position of the red machine, 1 wall, 2 middle, 3 room
-    public static int getPosition(ArrayList<BufferedImage> imageList) {
+    public static int[] getPosition(ArrayList<BufferedImage> imageList) {
         int listSize = imageList.size();
         int minDist;
         if (listSize < 10)
@@ -73,15 +73,15 @@ public class ImageProcessing {
         // + functioningIndex1 + " Second Index: " + functioningIndex2);
 
         if (errorIndex < functioningIndex1 && errorIndex < functioningIndex2)
-            return 0;
+            return new int[]{0, errorIndex};
         if (errorIndex > functioningIndex1 && errorIndex < functioningIndex2
                 || errorIndex < functioningIndex1
                 && errorIndex > functioningIndex2)
-            return 1;
+            return new int[]{1, errorIndex};
         if (errorIndex > functioningIndex1 && errorIndex > functioningIndex2)
-            return 2;
+            return new int[]{2, errorIndex};
 
-        return -1;
+        return new int[]{-1, 0};
 
     }
 }
