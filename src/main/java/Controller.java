@@ -263,12 +263,13 @@ public class Controller {
     private void stabilizeLeft() {
         int currLeft = sensorData[4][0];
 
-        int sideThrust = (int) ((((leftThreshDistance - currLeft) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
+        int sideThrust = (int) Math.max(thrustLow,((1-(((currLeft - leftThreshDistance) + roomDistance / 2) / (roomDistance))) * (motorHigh - motorLow) + motorLow));
 
         FlightController.setRoll(sideThrust);
 
     }
 
+    //bullshitcode do not use!
     private void stabilizeLeftLand() {
         int currLeft = sensorData[4][0];
 
@@ -278,6 +279,7 @@ public class Controller {
 
     }
 
+    //bullshitcode do not use!
     private void stabilizeCenterFontBackLand() {
         int currBack = sensorData[3][0];
         int currFront = sensorData[1][0];
