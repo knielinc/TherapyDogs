@@ -59,7 +59,7 @@ public class Controller {
 
     private double thrustLow = 1500;
 
-    private double groundThresh = 100;
+    private double groundThresh = 50;
 
     private double rightPassedRoomDistance = 310;
 
@@ -88,6 +88,12 @@ public class Controller {
 
             //TODO maybe in parallel
             //TODO clip/ignore false data
+
+            try {
+                Thread.sleep(25);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             int bottomVal = mySensor.measureBottom();
             int frontVal = mySensor.measureFront();

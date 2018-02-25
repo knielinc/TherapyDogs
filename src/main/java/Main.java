@@ -1,8 +1,6 @@
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.image.BufferedImage;
-
 public class Main {
     public static final Logger logger = LoggerFactory.getLogger(Main.class);
 
@@ -45,9 +43,9 @@ public class Main {
 
             Thread.sleep(2000);
 
-            Camera.startCamera();
+            //logger.info("Drone ready for start!");
 
-            logger.info("Drone ready for start!");
+            /*Camera.startCamera();
 
             BufferedImage lastImage = Camera.takePreparedPicture();
 
@@ -61,7 +59,7 @@ public class Main {
                 lastImage = curImage;
             }
 
-            Camera.stopCamera();
+            Camera.stopCamera();*/
 
             logger.info("Drone starts");
 
