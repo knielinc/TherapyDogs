@@ -271,6 +271,7 @@ public class Controller {
     }
 
     private void flyIn2() {
+        Camera.startCamera();
         stabilizeHeight();
         stabilizeCenterFontBack();
         stabilizeLeft();

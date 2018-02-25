@@ -45,9 +45,9 @@ public class Main {
 
             Thread.sleep(2000);
 
-            logger.info("Drone ready for start!");
+            //logger.info("Drone ready for start!");
 
-            Camera.startCamera();
+            /*Camera.startCamera();
 
             BufferedImage lastImage = Camera.takePreparedPicture();
 
@@ -61,7 +61,7 @@ public class Main {
                 lastImage = curImage;
             }
 
-            Camera.stopCamera();
+            Camera.stopCamera();*/
 
             logger.info("Drone starts");
 
