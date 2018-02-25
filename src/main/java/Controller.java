@@ -260,7 +260,7 @@ public class Controller {
     private void stabilizeRight() {
         int currRight = sensorData[2][0];
 
-        int sideThrust = (int) ((((currRight - rightThreshDistance) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow);
+        int sideThrust = (int) Math.min(thrustHigh,((((currRight - rightThreshDistance) + roomDistance / 2) / (roomDistance)) * (motorHigh - motorLow) + motorLow));
 
         FlightController.setRoll(sideThrust);
 
