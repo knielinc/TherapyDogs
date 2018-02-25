@@ -50,8 +50,12 @@ public class UltraSens {
             }
             long endTime = System.nanoTime(); // Store the echo pin HIGH end time to calculate ECHO pin HIGH time.
 
+            int dist = (int) ((((endTime - startTime) / 1e3) / 2) / 29.1);
+            if (dist > 400) {
+                return -1;
+            }
 
-            return (int) ((((endTime - startTime) / 1e3) / 2) / 29.1);
+            return dist;
         } catch (InterruptedException e) {
             e.printStackTrace();
             return -1;
