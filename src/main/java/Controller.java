@@ -143,6 +143,8 @@ public class Controller {
             yVel = ((double) (sensorData[2][1] - sensorData[2][0]) + (sensorData[4][0] - sensorData[4][1])) / (double) (2 * (timeTable[0] - timeTable[1]) * 1000);
             zVel = ((double) (sensorData[0][1] - sensorData[0][0]) / (double) ((timeTable[0] - timeTable[1]) * 1000));
 
+            Process timelapse = null;
+
             switch (currStage) {
                 case LIFTOFF:
                     liftOff();
@@ -179,8 +181,9 @@ public class Controller {
                         // Take timelapse
                         try {
                             FileUtils.cleanDirectory(new File("images"));
-                            ProcessBuilder processBuilder = new ProcessBuilder("raspistill", "-t", "10000", "-tl", "1000", "-w", "1640", "-h", "922", "-q", "10", "-o", "images/image%02d.jpg");
-                            Process timelapse = processBuilder.start();
+                            ProcessBuilder processBuilder = new ProcessBuilder("raspistill", "-t", "0", "-tl", "1000", "-w", "1640", "-h", "922", "-q", "10", "-o", "images/image%02d.jpg");
+                            timelapse = processBuilder.start();
+
                             timelapse.waitFor();
                         } catch (IOException | InterruptedException e) {
                             e.printStackTrace();
@@ -188,6 +191,21 @@ public class Controller {
                     }
                     break;
                 case ROTATE:
+                    if (sensorData[2][0] > rightPassedRoomDistance) {
+                        if (timelapse != null) {
+                            timelapse.destroy();
+                        }
+
+                        FlightController.setYaw(1600);
+                        currStage = myStage.FLYOUT;
+                        Main.logger.info("---------------");
+                        Main.logger.info("Entering flyout");
+                        Main.logger.info("---------------");
+                    }
+                    break;
+                case FLYOUT:
+                    flyIn2();
+
                     ArrayList<BufferedImage> images = new ArrayList<>();
                     try {
                         File dir = new File("images");
@@ -204,17 +222,6 @@ public class Controller {
                     // Process images
                     Main.logger.info("It seems that engine " + ImageProcessing.getPosition(images) + "is broken.");
 
-                    finishedRotating = true;
-                    if (finishedRotating) {
-                        FlightController.setYaw(1600);
-                        currStage = myStage.FLYOUT;
-                        Main.logger.info("---------------");
-                        Main.logger.info("Entering flyout");
-                        Main.logger.info("---------------");
-                    }
-                    break;
-                case FLYOUT:
-                    flyIn1();
                     if (isStable() && isInLandingPos()) {
                         currStage = myStage.LANDING;
                         Main.logger.info("----------------");
@@ -223,14 +230,20 @@ public class Controller {
                     }
                     break;
                 case LANDING:
+                    FlightController.setThrust(1400);
                     if (sensorData[0][0] < landingThreshold) {
                         inflight = false;
+                        FlightController.setThrust(1000);
+                        FlightController.setRoll(1500);
+                        FlightController.setPitch(1500);
+                        FlightController.setYaw(1500);
                     }
                     break;
                 default:
                     break;
             }
         }
+
         Main.logger.info("Landing successful!");
     }
 
